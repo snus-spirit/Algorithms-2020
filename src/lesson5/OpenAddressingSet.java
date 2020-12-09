@@ -1,6 +1,5 @@
 package lesson5;
 
-import kotlin.NotImplementedError;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.AbstractSet;
@@ -20,13 +19,14 @@ public class OpenAddressingSet<T> extends AbstractSet<T> {
     private int startingIndex(Object element) {
         return element.hashCode() & (0x7FFFFFFF >> (31 - bits));
     }
+    // Смещает max int на (31 - bits), далее побитовый And
 
     public OpenAddressingSet(int bits) {
         if (bits < 2 || bits > 31) {
             throw new IllegalArgumentException();
         }
         this.bits = bits;
-        capacity = 1 << bits;
+        capacity = 1 << bits;// Делает вместимость 2^bits
         storage = new Object[capacity];
     }
 
@@ -45,11 +45,12 @@ public class OpenAddressingSet<T> extends AbstractSet<T> {
         while (current != null) {
             if (current.equals(o)) {
                 return true;
-            }
+            }//Если я ищу несуществующий элемент в полной таблице, то зациклится
             index = (index + 1) % capacity;
             current = storage[index];
         }
         return false;
+
     }
 
     /**
@@ -67,7 +68,7 @@ public class OpenAddressingSet<T> extends AbstractSet<T> {
         int startingIndex = startingIndex(t);
         int index = startingIndex;
         Object current = storage[index];
-        while (current != null) {
+        while (current != null && current != DELETED) {
             if (current.equals(t)) {
                 return false;
             }
@@ -93,10 +94,27 @@ public class OpenAddressingSet<T> extends AbstractSet<T> {
      *
      * Средняя
      */
+    // Время O(n)
+    // Ресурсы O(1)
     @Override
     public boolean remove(Object o) {
-        return super.remove(o);
+        int startingIndex = startingIndex(o);
+        int index = startingIndex;
+        Object current = storage[index];
+        while (current != null && current != DELETED) {
+            if (current.equals(o)) {
+                storage[index] = DELETED;
+                size--;
+                return true;
+            }
+            index = (index + 1) % capacity;
+            if (index == startingIndex) return false;
+            current = storage[index];
+        }
+        return false;
     }
+
+    private final Object DELETED = new Object();
 
     /**
      * Создание итератора для обхода таблицы
@@ -111,7 +129,47 @@ public class OpenAddressingSet<T> extends AbstractSet<T> {
     @NotNull
     @Override
     public Iterator<T> iterator() {
-        // TODO
-        throw new NotImplementedError();
+        return new OpenAddressingSetIterator();
+    }
+
+    public class OpenAddressingSetIterator implements Iterator<T> {
+        private int index = 0;
+        private int count = 0;
+        private T lastCurrent;
+
+        //Время O(1)
+        //Ресурсы O(1)
+        @Override
+        public boolean hasNext() {
+            return count < size;
+        }
+
+        //Время O(n)
+        //Ресурсы O(1)
+        @Override
+        @SuppressWarnings("unchecked")
+        public T next() {
+            if (!hasNext())
+                throw new IllegalStateException();
+            while (storage[index] == null || storage[index] == DELETED)
+                index++;
+            lastCurrent = (T) storage[index];
+            index++;
+            count++;
+            return lastCurrent;
+        }
+
+        //Время O(1)
+        //Ресурсы O(1)
+        @Override
+        public void remove() {
+            if (lastCurrent == null)
+                throw new IllegalStateException();
+            storage[index - 1] = DELETED;
+            lastCurrent = null;
+            size--;
+            count--;
+        }
+
     }
 }

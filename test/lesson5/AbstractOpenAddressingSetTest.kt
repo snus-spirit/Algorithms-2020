@@ -76,6 +76,16 @@ abstract class AbstractOpenAddressingSetTest {
                 )
             }
         }
+        println("My test")
+        val set = mutableSetOf(1, 2, 4, 8, 16, 32, 64, 128)
+        val addressingSet = OpenAddressingSet<Int>(3)
+        addressingSet.addAll(set)
+        assertTrue(addressingSet.remove(32))
+        assertFalse(addressingSet.remove(32))
+        assertFalse(addressingSet.remove(111))
+        val size = addressingSet.size
+        assertTrue(addressingSet.remove(1))
+        assertEquals(size - 1, addressingSet.size)
     }
 
     protected fun doIteratorTest() {
@@ -118,6 +128,17 @@ abstract class AbstractOpenAddressingSetTest {
             }
             println("All clear!")
         }
+        println("My test")
+        val set = mutableSetOf(1, 2, 4, 8, 16, 32, 64, 128)
+        val addressingSet = OpenAddressingSet<Int>(3)
+        val iter = addressingSet.iterator()
+        assertFalse(iter.hasNext())
+        assertFailsWith<IllegalStateException> { iter.next() }
+        addressingSet.addAll(set)
+        assertTrue(iter.hasNext())
+        while (iter.hasNext())
+            iter.next()
+        assertFailsWith<IllegalStateException> { iter.next() }
     }
 
     protected fun doIteratorRemoveTest() {
@@ -175,5 +196,20 @@ abstract class AbstractOpenAddressingSetTest {
             }
             println("All clear!")
         }
+        println("My test")
+        val set = mutableSetOf(1, 2, 4, 8, 16, 32, 64, 128)
+        val addressingSet = OpenAddressingSet<Int>(3)
+        val iter = addressingSet.iterator()
+        addressingSet.addAll(set)
+        assertFailsWith<java.lang.IllegalStateException> { iter.remove() }
+        val size = addressingSet.size
+        iter.next()
+        iter.remove()
+        assertEquals(size - 1, addressingSet.size)
+        while (iter.hasNext()) {
+            iter.next()
+            iter.remove()
+        }
+        assertEquals(0, addressingSet.size)
     }
 }
