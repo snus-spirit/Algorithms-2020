@@ -1,9 +1,9 @@
 package lesson6;
 
 import kotlin.NotImplementedError;
+import lesson6.impl.GraphBuilder;
 
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @SuppressWarnings("unused")
 public class JavaGraphTasks {
@@ -65,8 +65,29 @@ public class JavaGraphTasks {
      * |
      * J ------------ K
      */
+    // Время O(v + e) v - вершины e - ребра
+    // Ресурсы O(v + e)
     public static Graph minimumSpanningTree(Graph graph) {
-        throw new NotImplementedError();
+        GraphBuilder gb = new GraphBuilder();
+        if (graph.getEdges().isEmpty()) return gb.build();
+        Set<Graph.Vertex> visited = new HashSet<>() ;
+        Deque<Graph.Vertex> notVisited = new ArrayDeque<>();
+        Graph.Vertex tmp = graph.getVertices().iterator().next();
+        notVisited.add(tmp);
+        visited.add(tmp);
+        while(!notVisited.isEmpty()) {
+            Graph.Vertex current = notVisited.pop();
+            for (Graph.Vertex vert : graph.getNeighbors(current)) {
+                if (!visited.contains(vert)) {
+                    notVisited.add(vert);
+                    gb.addVertex(current.toString());
+                    gb.addVertex(vert.toString());
+                    gb.addConnection(current, vert, 1);
+                    visited.add(vert);
+                }
+            }
+        }
+        return gb.build();
     }
 
     /**
