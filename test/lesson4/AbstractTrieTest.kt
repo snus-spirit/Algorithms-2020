@@ -109,6 +109,19 @@ abstract class AbstractTrieTest {
             }
             println("All clear!")
         }
+        println("My test")
+        val controlSet = mutableSetOf<String>()
+        for (i in 1..10) {
+            val string = random.nextString("qwerty", 1, 15)
+            controlSet.add(string)
+        }
+        val trie = Trie()
+        var iter1 = trie.iterator()
+        assertFailsWith<IllegalStateException> { iter1.next() }
+        trie.addAll(controlSet)
+        iter1 = trie.iterator()
+        while(iter1.hasNext()) iter1.next()
+        assertFailsWith<IllegalStateException> { iter1.next() }
     }
 
     protected fun doIteratorRemoveTest() {
@@ -170,6 +183,22 @@ abstract class AbstractTrieTest {
             }
             println("All clear!")
         }
+        println("My test")
+        val controlSet = mutableSetOf<String>()
+        for (i in 1..10) {
+            val string = random.nextString("qwerty", 1, 15)
+            controlSet.add(string)
+        }
+        val trie = Trie()
+        var iter1 = trie.iterator()
+        assertFailsWith<IllegalStateException> { iter1.remove() }
+        trie.addAll(controlSet)
+        iter1 = trie.iterator()
+        while(iter1.hasNext()) {
+            iter1.next()
+            iter1.remove()
+        }
+        assertEquals(0, trie.size)
     }
 
 }

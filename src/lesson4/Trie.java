@@ -1,7 +1,7 @@
 package lesson4;
 
 import java.util.*;
-import kotlin.NotImplementedError;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,6 +12,7 @@ public class Trie extends AbstractSet<String> implements Set<String> {
 
     private static class Node {
         Map<Character, Node> children = new LinkedHashMap<>();
+        boolean visited = false;
     }
 
     private Node root = new Node();
@@ -84,16 +85,60 @@ public class Trie extends AbstractSet<String> implements Set<String> {
 
     /**
      * Итератор для префиксного дерева
-     *
+     * <p>
      * Спецификация: {@link Iterator} (Ctrl+Click по Iterator)
-     *
+     * <p>
      * Сложная
      */
     @NotNull
     @Override
     public Iterator<String> iterator() {
-        // TODO
-        throw new NotImplementedError();
+        return new TrieIterator();
     }
 
+    public class TrieIterator implements Iterator<String> {
+        int index = 0;
+        String current;
+        List<String> list = new ArrayList<>();
+
+        TrieIterator() {
+            if (root == null) return;
+            finder("", root);
+        }
+
+        //Время O(1)
+        //Ресурсы O(1)
+        @Override
+        public boolean hasNext() {
+            return index < list.size();
+        }
+
+        //Время O(n)
+        //Ресурсы O(n)
+        @Override
+        public String next() {
+            if (!hasNext()) throw new IllegalStateException();
+            current = list.get(index);
+            index++;
+            return current;
+        }
+
+        private void finder(String str, Node node) {
+            for (Map.Entry<Character, Node> entry : node.children.entrySet()) {
+                if (entry.getKey() == (char) 0)
+                    list.add(str);
+                finder(str + entry.getKey(), entry.getValue());
+            }
+        }
+
+        //Время O(n)
+        //Ресурсы O(n)
+        @Override
+        public void remove() {
+            if (current == null)
+                throw new IllegalStateException();
+            Trie.this.remove(current);
+            current = null;
+        }
+    }
 }
